@@ -1,15 +1,16 @@
 package com.example.assignmentmovie.data
 
-import com.example.assignmentmovie.data.model.MovieDTO
-import com.example.assignmentmovie.data.model.MovieDetailsDTO
+import com.example.assignmentmovie.common.Constants
+import com.example.assignmentmovie.data.dto.MovieDTO
+import com.example.assignmentmovie.data.dto.MovieDetailsDTO
 import com.example.assignmentmovie.domain.model.Movie
 import com.example.assignmentmovie.domain.model.MovieDetailInfo
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 object MockData {
     const val id = 12344
-    private const val backdropPath = "path.jpeg"
-    private const val posterPath = "poster.jpeg"
+     const val backdropPath = "path.jpeg"
+     const val posterPath = "poster.jpeg"
     private const val overview = "Overview of Movie 1"
     private const val title = "Movie 1"
     private const val releaseDate = "2022-10-09"
@@ -35,14 +36,13 @@ object MockData {
         )
     val movieDetailInfo = MovieDetailInfo(
         id,
-        backdropPath,
         overview,
         posterPath,
+        tagline,
         releaseDate,
         runtimeString,
-        tagline,
         title,
-
+        backdropPath,
         )
     val movieDTO = MovieDTO(
         id,

@@ -1,8 +1,8 @@
 package com.example.assignmentmovie.presentation.viewmodel
 
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.common.ViewState
 import com.example.assignmentmovie.domain.usecase.MovieDetailsUseCase
+import com.example.assignmentmovie.domain.usecase.Response
 import com.example.assignmentmovie.presentation.Dispatcher
 import com.example.assignmentmovie.presentation.MockData.errorMsg
 import com.example.assignmentmovie.presentation.MockData.movieDetailInfo
@@ -47,7 +47,7 @@ class MovieDetailInfoViewModelTest {
 
     @Test
     fun `getMovieDetails on Error returns Error ViewState`() = runTest {
-        val response = Response.Error(errorMsg)
+        val response =Response.Error(errorMsg)
         coEvery { mockMovieDetailsUseCase(1) } returns flowOf(response)
 
         movieDetailsViewModel.getMovieDetails(1)

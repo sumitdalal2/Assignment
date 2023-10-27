@@ -2,10 +2,10 @@ package com.example.assignmentmovie.presentation.moviedetails.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.common.ViewState
 import com.example.assignmentmovie.domain.model.MovieDetailInfo
 import com.example.assignmentmovie.domain.usecase.MovieDetailsUseCase
+import com.example.assignmentmovie.domain.usecase.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +27,6 @@ class MovieDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             movieDetailsUseCase(movieId).collect() {
                 when (it) {
-                    is Response.Loading -> _movieDetailInfoStateFlow.value = ViewState.Loading
                     is Response.Error -> _movieDetailInfoStateFlow.value =
                         ViewState.Error(it.message)
 

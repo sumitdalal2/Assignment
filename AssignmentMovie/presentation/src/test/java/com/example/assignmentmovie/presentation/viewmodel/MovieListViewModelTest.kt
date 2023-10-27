@@ -1,9 +1,9 @@
 package com.example.assignmentmovie.presentation.viewmodel
 
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.common.ViewState
 import com.example.assignmentmovie.domain.model.MovieList
 import com.example.assignmentmovie.domain.usecase.MoviesListUseCase
+import com.example.assignmentmovie.domain.usecase.Response
 import com.example.assignmentmovie.presentation.Dispatcher
 import com.example.assignmentmovie.presentation.MockData.errorMsg
 import com.example.assignmentmovie.presentation.MockData.movie

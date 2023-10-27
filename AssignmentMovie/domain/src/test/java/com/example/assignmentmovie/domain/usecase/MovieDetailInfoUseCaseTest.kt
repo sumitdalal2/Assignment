@@ -1,6 +1,5 @@
 package com.example.assignmentmovie.domain.usecase
 
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.domain.repository.IRepository
 import com.example.assignmentmovie.domain.usecase.MockData.errorMsg
 import com.example.assignmentmovie.domain.usecase.MockData.id

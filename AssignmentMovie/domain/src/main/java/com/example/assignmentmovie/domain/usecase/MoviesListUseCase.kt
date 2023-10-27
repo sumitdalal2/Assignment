@@ -1,6 +1,5 @@
 package com.example.assignmentmovie.domain.usecase
 
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.domain.model.MovieList
 import com.example.assignmentmovie.domain.repository.IRepository
 import kotlinx.coroutines.flow.Flow

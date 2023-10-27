@@ -1,21 +1,23 @@
 package com.example.assignmentmovie.data.repository.datasource
 
+import com.example.assignmentmovie.common.Constants
 import com.example.assignmentmovie.data.BuildConfig
 import com.example.assignmentmovie.data.MockData
 import com.example.assignmentmovie.data.MockData.IOResponseErrorMessage
+import com.example.assignmentmovie.data.MockData.backdropPath
 import com.example.assignmentmovie.data.MockData.errorCode
 import com.example.assignmentmovie.data.MockData.httpResponseErrorMessage
 import com.example.assignmentmovie.data.MockData.id
 import com.example.assignmentmovie.data.MockData.movieDetailInfo
 import com.example.assignmentmovie.data.MockData.movieDetailsDTO
+import com.example.assignmentmovie.data.MockData.posterPath
 import com.example.assignmentmovie.data.MockData.responseBody
 import com.example.assignmentmovie.data.MockData.responseErrorMessage
 import com.example.assignmentmovie.data.api.APIService
-import com.example.assignmentmovie.data.mapper.MovieDetailDTOModelMapper
-import com.example.assignmentmovie.data.mapper.MovieListDTOModelMapper
-import com.example.assignmentmovie.data.model.MovieDetailsDTO
-import com.example.assignmentmovie.data.model.MovieListDTO
+import com.example.assignmentmovie.data.dto.MovieDetailsDTO
+import com.example.assignmentmovie.data.dto.MovieListDTO
 import com.example.assignmentmovie.domain.model.MovieList
+import com.example.assignmentmovie.domain.usecase.Response
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.last
@@ -31,37 +33,38 @@ class MovieRemoteDataSourceImplTest {
 
     private val mockTmdbService: APIService = mockk()
 
-    private val mockMovieListDTOModelMapper: MovieListDTOModelMapper = mockk()
 
-    private val mockMovieDetailDTOModelMapper: MovieDetailDTOModelMapper = mockk()
 
     private lateinit var movieRemoteDataSource: MovieRemoteDataSourceImpl
 
     @Before
     fun setup() {
         movieRemoteDataSource = MovieRemoteDataSourceImpl(
-            mockTmdbService, mockMovieListDTOModelMapper, mockMovieDetailDTOModelMapper
+            mockTmdbService
         )
     }
 
     @Test
     fun `getMovies() on success returns flow of Success ApiResponse`() = runTest {
         val moviesDTO = listOf(MockData.movieDTO)
+
         val movies = listOf(MockData.movie)
 
         val movieListDto = MovieListDTO(movieDTO = moviesDTO)
-        val expectedMovieList = MovieList(movies)
+        val mList = MovieList(movies).movies.map {movie->
+            movie.copy(posterPath = Constants.IMG_URL + movie.posterPath)
+        }
+        val expectedMovieList =MovieList(movies =mList)
 
         coEvery { (mockTmdbService.getMovies(BuildConfig.API_KEY)) } returns (retrofit2.Response.success(
             movieListDto
         ))
-        coEvery { (mockMovieListDTOModelMapper.mapInto(movieListDto)) } returns (expectedMovieList)
 
         // Act
         val result = movieRemoteDataSource.getMovies().last()
 
         // Assert
-        assertEquals(com.example.assignmentmovie.common.Response.Success(expectedMovieList), result)
+        assertEquals(Response.Success(expectedMovieList), result)
     }
 
     @Test
@@ -76,7 +79,7 @@ class MovieRemoteDataSourceImplTest {
         val result = movieRemoteDataSource.getMovies().last()
 
         assertEquals(
-            responseErrorMessage, (result as com.example.assignmentmovie.common.Response.Error).message
+            responseErrorMessage, (result as Response.Error).message
         )
     }
 
@@ -95,7 +98,7 @@ class MovieRemoteDataSourceImplTest {
             val result = movieRemoteDataSource.getMovies().last()
 
             assertEquals(
-                com.example.assignmentmovie.common.Response.Error(httpResponseErrorMessage), result
+                Response.Error(httpResponseErrorMessage), result
             )
         }
 
@@ -110,7 +113,7 @@ class MovieRemoteDataSourceImplTest {
             // Act
             val result = movieRemoteDataSource.getMovies().last()
 
-            assertEquals(com.example.assignmentmovie.common.Response.Error(IOResponseErrorMessage), result)
+            assertEquals(Response.Error(IOResponseErrorMessage), result)
         }
 
     @Test
@@ -119,18 +122,17 @@ class MovieRemoteDataSourceImplTest {
             // Arrange
             val movieId = id
             val movieDetailsDto = movieDetailsDTO
-            val expectedMovieDetails = movieDetailInfo
+            val expectedMovieDetails = movieDetailInfo.copy(posterPath = Constants.IMG_URL+ posterPath, backdropPath = Constants.IMG_URL+ backdropPath)
             coEvery {
                 (mockTmdbService.getMovieDetails(
                     movieId, BuildConfig.API_KEY
                 ))
             } returns (retrofit2.Response.success(movieDetailsDto))
-            coEvery { (mockMovieDetailDTOModelMapper.mapInto(movieDetailsDto)) } returns (expectedMovieDetails)
 
             // Act
             val result = movieRemoteDataSource.getMovieDetails(movieId).last()
 
-            assertEquals(com.example.assignmentmovie.common.Response.Success(expectedMovieDetails), result)
+            assertEquals(Response.Success(expectedMovieDetails), result)
         }
 
 
@@ -150,7 +152,7 @@ class MovieRemoteDataSourceImplTest {
         val result = movieRemoteDataSource.getMovieDetails(movieId).last()
 
         assertEquals(
-            responseErrorMessage, (result as com.example.assignmentmovie.common.Response.Error).message
+            responseErrorMessage, (result as Response.Error).message
         )
 
     }
@@ -173,7 +175,7 @@ class MovieRemoteDataSourceImplTest {
             val result = movieRemoteDataSource.getMovieDetails(movieId).last()
 
             assertEquals(
-                com.example.assignmentmovie.common.Response.Error(httpResponseErrorMessage), result
+                Response.Error(httpResponseErrorMessage), result
             )
         }
 
@@ -191,7 +193,7 @@ class MovieRemoteDataSourceImplTest {
             // Act
             val result = movieRemoteDataSource.getMovieDetails(movieId).last()
 
-            assertEquals(com.example.assignmentmovie.common.Response.Error(IOResponseErrorMessage), result)
+            assertEquals(Response.Error(IOResponseErrorMessage), result)
         }
 
 }

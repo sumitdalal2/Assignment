@@ -1,7 +1,7 @@
 package com.example.assignmentmovie.data.api
 
-import com.example.assignmentmovie.data.model.MovieDetailsDTO
-import com.example.assignmentmovie.data.model.MovieListDTO
+import com.example.assignmentmovie.data.dto.MovieDetailsDTO
+import com.example.assignmentmovie.data.dto.MovieListDTO
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

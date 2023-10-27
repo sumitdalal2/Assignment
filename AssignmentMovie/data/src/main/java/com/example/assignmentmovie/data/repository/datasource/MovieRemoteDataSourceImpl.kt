@@ -1,73 +1,90 @@
 package com.example.assignmentmovie.data.repository.datasource
 
-import com.example.assignmentmovie.common.Response
+import com.example.assignmentmovie.common.Constants
+import com.example.assignmentmovie.domain.usecase.Response
 import com.example.assignmentmovie.data.BuildConfig
 import com.example.assignmentmovie.data.api.APIService
-import com.example.assignmentmovie.data.mapper.MovieDetailDTOModelMapper
-import com.example.assignmentmovie.data.mapper.MovieListDTOModelMapper
+import com.example.assignmentmovie.data.dto.MovieDetailsDTO
+import com.example.assignmentmovie.domain.model.Movie
 import com.example.assignmentmovie.domain.model.MovieDetailInfo
 import com.example.assignmentmovie.domain.model.MovieList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
 class MovieRemoteDataSourceImpl @Inject constructor(
     private val apiService: APIService,
-    private val movieListDTOModelMapper: MovieListDTOModelMapper,
-    private val movieDetailDTOModelMapper: MovieDetailDTOModelMapper
 ) : MovieRemoteDataSource {
+    private suspend fun <T> executeApiCall(apiCall: suspend () -> retrofit2.Response<T>): Response<T> =
+        try {
+            val response = apiCall()
+            if (response.isSuccessful) {
+                val body = requireNotNull(response.body()) { "Response body is null." }
+                Response.Success(body)
+            } else {
+                Response.Error(response.message())
+            }
+        } catch (e: HttpException) {
+            Response.Error(e.localizedMessage ?: "")
+        } catch (e: IOException) {
+            Response.Error(e.localizedMessage ?: "")
+        }
 
     override suspend fun getMovies(): Flow<Response<MovieList>> = flow {
-        emit(Response.Loading)
-        try {
-            val response = apiService.getMovies(BuildConfig.API_KEY)
-            if (response.isSuccessful) {
-                response.body()
-                    ?.let {
-                        emit(
-                            Response.Success(
-                                movieListDTOModelMapper.mapInto(it)
-                            )
-                        )
-                    }
-            } else {
-                emit(Response.Error(response.message()))
-            }
-
-        } catch (e: HttpException) {
-            emit(Response.Error(e.localizedMessage ?: ""))
-
-        } catch (e: IOException) {
-            emit(Response.Error(e.localizedMessage ?: ""))
-
+        val response = executeApiCall { apiService.getMovies(BuildConfig.API_KEY) }
+        if (response is Response.Success) {
+            emit(response.data)
         }
-    }.flowOn(Dispatchers.IO)
-
+    }.map { data ->
+        Response.Success(MovieList(movies = data.movieDTO.map { from ->
+            Movie(
+                id = from.id,
+                posterPath = Constants.IMG_URL + from.posterPath,
+                releaseDate = from.releaseDate,
+                title = from.title,
+            )
+        }))
+    }
 
     override suspend fun getMovieDetails(movieId: Int): Flow<Response<MovieDetailInfo>> = flow {
-        emit(Response.Loading)
         try {
-
-            val response = apiService.getMovieDetails(movieId, BuildConfig.API_KEY)
-            if (response.isSuccessful) {
-
-                response.body()
-                    ?.let { emit(Response.Success(movieDetailDTOModelMapper.mapInto(it))) }
+            val response =
+                executeApiCall { apiService.getMovieDetails(movieId, BuildConfig.API_KEY) }
+            if (response is Response.Success) {
+                emit(response.data)
             } else {
-                emit(Response.Error(response.message()))
+                emit(Response.Error("An error occurred"))
             }
-
-        } catch (e: HttpException) {
-            emit(Response.Error(e.localizedMessage ?: ""))
-
-        } catch (e: IOException) {
-            emit(Response.Error(e.localizedMessage ?: ""))
+        }catch (e:Exception){
 
         }
-    }.flowOn(Dispatchers.IO)
-}
+    }.transform { data ->
+        // Map the successful response to MovieDetailInfo
+        if (data is MovieDetailsDTO) {
+            emit(
+                Response.Success(
+                    MovieDetailInfo(
+                        id = data.id,
+                        overview = data.overview,
+                        releaseDate = data.releaseDate,
+                        runtime = "${data.runtime} ${Constants.MINUTES}",
+                        tagline = data.tagline,
+                        posterPath = Constants.IMG_URL + data.posterPath,
+                        title = data.title,
+                        backdropPath = Constants.IMG_URL + data.backdropPath
+                    )
+                )
+            )
+        } else {
+            // Handle unexpected data and emit an error response
+            emit(Response.Error("Unexpected data type"))
+        }
 
+
+    }
+
+}

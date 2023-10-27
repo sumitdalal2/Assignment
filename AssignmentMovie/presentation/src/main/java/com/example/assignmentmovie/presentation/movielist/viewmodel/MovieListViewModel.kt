@@ -2,10 +2,10 @@ package com.example.assignmentmovie.presentation.movielist.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.assignmentmovie.common.Response
 import com.example.assignmentmovie.common.ViewState
 import com.example.assignmentmovie.domain.model.Movie
 import com.example.assignmentmovie.domain.usecase.MoviesListUseCase
+import com.example.assignmentmovie.domain.usecase.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +32,6 @@ class MovieListViewModel @Inject constructor(private val moviesListUseCase: Movi
                     is Response.Error -> _movieListStateFlow.value =
                         ViewState.Error(it.message)
 
-                    Response.Loading -> _movieListStateFlow.value = ViewState.Loading
                     is Response.Success -> _movieListStateFlow.value =
                         ViewState.Success(it.data.movies)
                 }

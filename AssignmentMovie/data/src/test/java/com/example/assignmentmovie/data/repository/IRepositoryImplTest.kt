@@ -1,6 +1,6 @@
 package com.example.assignmentmovie.data.repository
 
-import com.example.assignmentmovie.common.Response
+import com.example.assignmentmovie.domain.usecase.Response
 import com.example.assignmentmovie.data.MockData.id
 import com.example.assignmentmovie.data.MockData.movieDetailInfo
 import com.example.assignmentmovie.data.repository.datasource.MovieRemoteDataSource
