@@ -5,6 +5,7 @@ import com.example.assignmentmovie.domain.usecase.Response
 import com.example.assignmentmovie.data.BuildConfig
 import com.example.assignmentmovie.data.api.APIService
 import com.example.assignmentmovie.data.dto.MovieDetailsDTO
+import com.example.assignmentmovie.data.dto.MovieListDTO
 import com.example.assignmentmovie.domain.model.Movie
 import com.example.assignmentmovie.domain.model.MovieDetailInfo
 import com.example.assignmentmovie.domain.model.MovieList
@@ -38,30 +39,33 @@ class MovieRemoteDataSourceImpl @Inject constructor(
         val response = executeApiCall { apiService.getMovies(BuildConfig.API_KEY) }
         if (response is Response.Success) {
             emit(response.data)
+        }else if (response is Response.Error) {
+            emit(response.message)
         }
-    }.map { data ->
-        Response.Success(MovieList(movies = data.movieDTO.map { from ->
-            Movie(
-                id = from.id,
-                posterPath = Constants.IMG_URL + from.posterPath,
-                releaseDate = from.releaseDate,
-                title = from.title,
-            )
-        }))
+    }.transform { data ->
+        if (data is MovieListDTO) {
+            emit(Response.Success(MovieList(movies = data.movieDTO.map { from ->
+                Movie(
+                    id = from.id,
+                    posterPath = Constants.IMG_URL + from.posterPath,
+                    releaseDate = from.releaseDate,
+                    title = from.title,
+                )
+            })))
+        }else{
+            emit(Response.Error(data.toString()))
+        }
     }
 
     override suspend fun getMovieDetails(movieId: Int): Flow<Response<MovieDetailInfo>> = flow {
-        try {
-            val response =
-                executeApiCall { apiService.getMovieDetails(movieId, BuildConfig.API_KEY) }
-            if (response is Response.Success) {
-                emit(response.data)
-            } else {
-                emit(Response.Error("An error occurred"))
-            }
-        }catch (e:Exception){
-
+        val response =
+            executeApiCall { apiService.getMovieDetails(movieId, BuildConfig.API_KEY) }
+        if (response is Response.Success) {
+            emit(response.data)
+        } else if (response is Response.Error) {
+            emit(response.message)
         }
+
     }.transform { data ->
         // Map the successful response to MovieDetailInfo
         if (data is MovieDetailsDTO) {
@@ -81,10 +85,8 @@ class MovieRemoteDataSourceImpl @Inject constructor(
             )
         } else {
             // Handle unexpected data and emit an error response
-            emit(Response.Error("Unexpected data type"))
+            emit(Response.Error(data.toString()))
         }
-
-
     }
 
 }

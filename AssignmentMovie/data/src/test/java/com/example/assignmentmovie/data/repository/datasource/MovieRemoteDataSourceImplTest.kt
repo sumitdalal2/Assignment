@@ -47,9 +47,7 @@ class MovieRemoteDataSourceImplTest {
     @Test
     fun `getMovies() on success returns flow of Success ApiResponse`() = runTest {
         val moviesDTO = listOf(MockData.movieDTO)
-
         val movies = listOf(MockData.movie)
-
         val movieListDto = MovieListDTO(movieDTO = moviesDTO)
         val mList = MovieList(movies).movies.map {movie->
             movie.copy(posterPath = Constants.IMG_URL + movie.posterPath)
