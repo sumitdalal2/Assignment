@@ -31,9 +31,11 @@ import com.example.assignmentmovie.presentation.navigation.AppNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.CancellationException
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -44,20 +46,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-     CoroutineScope(Dispatchers.IO).launch {
-         launch { println("SUMIT") }
-         launch { println("SUMIT") }
-         delay(1000)
-         launch { println("SUMIT") }
-     }
-
-     CoroutineScope(Dispatchers.IO).launch {
-            println("SUMIT")
-            println("SUMIT")
-            println("SUMIT")
-     }
-
         setContent {
             val toolbarTitle = remember { mutableStateOf("") }
             val secondaryScreenHeader = remember { mutableStateOf(false) }

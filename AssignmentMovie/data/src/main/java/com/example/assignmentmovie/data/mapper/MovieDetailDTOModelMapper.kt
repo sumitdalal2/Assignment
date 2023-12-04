@@ -18,4 +18,5 @@ class MovieDetailDTOModelMapper @Inject constructor()  {
             backdropPath = Constants.IMG_URL + from.backdropPath
         )
     }
+
 }
